@@ -19,7 +19,7 @@ namespace BinarySearch.Search
 
             int[] keys = numbers.Numbers;
 
-            Console.WriteLine("Use one of these numbers [ 964022, 517953, 144558, 587583, 502631, 956529, 639705 ]");
+            Console.WriteLine("Use one of these numbers [ 964022, 517953, 563594, 144558, 587583, 502631, 956529, 639705 ]");
 
             Console.WriteLine("Insert the value to search:");
             var searchValue = Console.ReadLine();
