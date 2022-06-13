@@ -1,72 +1,116 @@
 ﻿
-var randomGenerator = new Random();
+using System.Diagnostics;
+using System.Text.Json;
 
-Console.WriteLine("This is a simple binary search!");
-Console.WriteLine("Insert the max length of array.");
-Console.WriteLine("Input just int values, if inserted value in string or empty, the default value is 100.");
-var maxValueOfArray = Console.ReadLine();
-
-if (!int.TryParse(maxValueOfArray, out int max))
-    max = 100;
-
-int[] keys = new int[max];
-
-for (int i = 0; i < max; i++)
+namespace BinarySearch.Search
 {
-    int num = randomGenerator.Next(1, max * 10);
-
-    while (Array.Exists(keys, key => key == num))
+    public class Program
     {
-        num = randomGenerator.Next(1, max * 10);
+        static async Task Main()
+        {
+            Stopwatch stopWatchBinarySearch = new();
+            Stopwatch stopWatchLinearSearch = new();
+
+            Console.WriteLine("This is a simple binary search!");
+
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), @"data/numbers.json");
+
+            var numbers = await Util.ReadAsync(filePath);
+
+            int[] keys = numbers.Numbers;
+
+            Console.WriteLine("Use one of these numbers [ 964022, 517953, 144558, 587583, 502631, 956529, 639705 ]");
+
+            Console.WriteLine("Insert the value to search:");
+            var searchValue = Console.ReadLine();
+
+            if (!int.TryParse(searchValue, out int key))
+                key = -1;
+
+            stopWatchLinearSearch.Start();
+            int positionLinearSearch = await Work.LinearSearch(keys, keys.Length, key);
+            stopWatchLinearSearch.Stop();
+
+            TimeSpan timeLinearSearch = stopWatchLinearSearch.Elapsed;
+
+            if (positionLinearSearch > -1)
+            {
+                Console.WriteLine($"Value foud at position {positionLinearSearch}");
+                Console.WriteLine($"Linear Search O(n) Worst Case: {timeLinearSearch.TotalMilliseconds} ms");
+            }
+            else
+                Console.WriteLine("Linear Search value not found :(");
+
+            Array.Sort(keys);
+
+            stopWatchBinarySearch.Start();
+            int positionBinarySearch = await Work.BinarySearch(keys, keys.Length, key);
+            stopWatchBinarySearch.Stop();
+
+            TimeSpan timeBinarySearch = stopWatchBinarySearch.Elapsed;
+
+            if (positionBinarySearch > -1)
+            {
+                Console.WriteLine($"Value foud at position {positionBinarySearch}");
+                Console.WriteLine($"Binary Search O(log n) Average: {timeBinarySearch.TotalMilliseconds} ms");
+            }
+            else
+                Console.WriteLine("Binary Search value not found :(");
+
+        }
     }
 
-    keys[i] = num;
-}
-
-Array.Sort(keys);
-
-Console.WriteLine("The keys of array is [" + String.Join(",", keys) + "]");
-
-Console.WriteLine("Insert the value to search:");
-var searchValue = Console.ReadLine();
-
-if (!int.TryParse(searchValue, out int key))
-    key = -1;
-
-int position = Work.BinarySearch(keys, keys.Length, key);
-
-if (position > -1)
-    Console.WriteLine("Value foud :) at position " + position);
-else
-    Console.WriteLine("Value not found :(");
-
-class Work
-{
-    /// <summary>
-    /// Simple binary search
-    /// </summary>
-    /// <param name="vector">Array with values</param>
-    /// <param name="logicalLength">Logical length of array</param>
-    /// <param name="key">Value to search in array</param>
-    /// <returns></returns>
-    public static int BinarySearch(int[] vector, int logicalLength, int key)
+    static class Util
     {
-        int low = 0;
-        int hight = logicalLength - 1;
-
-        do
+        public static async Task<Foo> ReadAsync(string filePath)
         {
-            int middle = (low + hight) / 2;
+            using FileStream stream = File.OpenRead(filePath);
+            var result = await JsonSerializer.DeserializeAsync<Foo>(stream);
 
-            if (vector[middle] == key)
-                return middle;
-            else if (vector[middle] < key)
-                low = middle + 1;
+            if (result == null)
+                return await Task.FromResult(new Foo());
             else
-                hight = middle - 1;
+                return result;
+        }
+    }
 
-        } while (low <= hight);
+    class Foo
+    {
+        public int[] Numbers { get; set; } = Array.Empty<int>();
+    }
 
-        return -1;
+    class Work
+    {
+        public static async Task<int> BinarySearch(int[] vector, int logicalLength, int key)
+        {
+            int low = 0;
+            int hight = logicalLength - 1;
+
+            do
+            {
+                int middle = (low + hight) / 2;
+
+                if (vector[middle] == key)
+                    return await Task.FromResult(middle);
+                else if (vector[middle] < key)
+                    low = middle + 1;
+                else
+                    hight = middle - 1;
+
+            } while (low <= hight);
+
+            return await Task.FromResult(-1);
+        }
+
+        public static async Task<int> LinearSearch(int[] vector, int logicalLength, int key)
+        {
+            for (int i = 0; i < logicalLength; i++)
+            {
+                if (vector[i] == key)
+                    return await Task.FromResult(i);
+            }
+
+            return await Task.FromResult(-1);
+        }
     }
 }

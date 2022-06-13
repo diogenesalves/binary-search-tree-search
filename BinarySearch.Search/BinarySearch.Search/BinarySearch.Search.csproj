@@ -7,4 +7,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="data\numbers.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
