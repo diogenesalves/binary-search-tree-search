@@ -13,7 +13,14 @@ int[] keys = new int[max];
 
 for (int i = 0; i < max; i++)
 {
-    keys[i] = randomGenerator.Next(max * 10);
+    int num = randomGenerator.Next(1, max * 10);
+
+    while (Array.Exists(keys, key => key == num))
+    {
+        num = randomGenerator.Next(1, max * 10);
+    }
+
+    keys[i] = num;
 }
 
 Array.Sort(keys);
